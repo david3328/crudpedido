@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Título de la página -->
+    <title>OPEMA | Areas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!--
+      el css lo importamos con toda la ruta, porque debemos recordar que el archivo es llamado
+      desde el index o raíz del proyecto
+      por lo tanto la ruta sería: views/css/bootstrap.min.css 
+    -->
+    <link rel="stylesheet" href="views/css/bootstrap.min.css">
+</head>
+<body>
+  <!-- el ID = app me permite bindear con la instancia Vue  -->  
+  <div class="container text-center" id="app">
+    <h3 class="panel-title py-4">Area</h3>
+      <div class="panel-body">
+        <form @submit.prevent="addArea()">
+          <p>Código: <input type="texto" v-model="area_id"></p>
+          <p>Nombre: <input type="texto" v-model="area_nombre"></p>
+          <div class="py-3">
+            <input type="submit" class="btn btn-primary" value="registrar">
+          </div>
+        </form>
+
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Codigo</th>
+          <th>Nombre</th>
+          <th>Editar</th>
+          <th>Eliminar</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- 
+        La directiva v-for me permite hacer el recorrido por un arreglo
+        asignamos un valor area que se recorre por cada area encontrada en el arreglo areas
+         -->
+        <tr v-for="area in areas">
+          <!-- De aca área mostramos su id, nombre y colocamos las opciones de editar y eliminar  -->
+          <td>{{area.number}}</td>
+          <td>{{area.name}}</td>
+          <!-- showEdita realizará una función/método al darle click el cuál se llama updateArea y recibe como parametro el área a actualizar  -->
+          <td><a href="#" @click="showUpdateArea(area)">Editar</a></td>
+          <!-- Eliminar realizará una función/método al darle click el cuál se llama deleteArea y recibe como parametro el área a eliminar  -->
+          <td><a href="#" @click="deleteArea(area)">Eliminar</a></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    <!-- Ventana modal para actualizar Area -->
+      <div class="fixed-top w-100 h-100 d-flex justify-content-center align-items-center bg-primary" v-if="showModal">
+        <!-- el boton actualizar, actualizará el dato mediante la función updateArea  -->
+        <form @submit.prevent="updateArea()">
+          <!-- bindeamos oldArea con los inputs  -->
+          <div class="form-group">
+            <label>
+              Código 
+              <input type="text" class="form-control" v-model="oldArea.number" readonly>
+            </label>
+          </div>
+          <div class="form-group">
+            <label>
+              Nombre
+              <input type="text" class="form-control" v-model="oldArea.name">
+            </label>
+          </div>
+          <div class="py-3">
+            <input type="submit" class="btn btn-success" value="Actualizar">
+            <!-- al darle click a cerrar la variable showModal pasa a falso, lo cuál cierra el modal  -->
+            <a href="#" @click="showModal=false" class="btn btn-danger">Cerrar</a>
+          </div>
+        </form>
+      </div>
+  </div>
+  
+  <!-- Importamos vueJS -->
+  <!-- Documentación de VueJS  https://vuejs.org/v2/guide/   -->
+  <script src="views/js/vue.js"></script>
+  <!-- Importamos sweetalert2 para crea custom alerts (alertas personalizadas)  -->
+  <!-- Documentación : https://sweetalert2.github.io/ -->
+  <script src="views/js/sweetalert.js"></script>
+  <script src="views/js/area.js"></script>
+</body>
+</html>

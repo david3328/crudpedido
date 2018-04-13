@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Título de la página -->
+    <title>OPEMA | Pedidos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--
+      el css lo importamos con toda la ruta, porque debemos recordar que el archivo es llamado
+      desde el index o raíz del proyecto
+      por lo tanto la ruta sería: views/css/bootstrap.min.css 
+    -->
+    <link rel="stylesheet" href="views/css/bootstrap.min.css">
+</head>
+<body>
+  <!-- el ID = app me permite bindear con la instancia Vue  -->    
+  <div class="container" id="app">
+    <!-- Redireccionamos a la vista de administrador  -->
+    <a href="?view=admin" class="btn btn-link">Inicio</a>
+    <!-- al dar click en Nuevo Pedido mostramos el modal y el modo en 0 (Registrar pedido) -->
+    <a href="#" class="btn btn-link" @click="showModal=true;mode=0">Nuevo Pedido</a>
+    <h2 class="text-center">Administrar Pedidos</h2> 
+    <form>
+      <div class="form-group">
+        <input type="text" class="form-control" v-model="valor" v-if="filterMode != 'fecha' && filterMode!='mes' ">
+        <input type="date" class="form-control" v-model="valor" v-if="filterMode == 'fecha'">
+        <select v-model="valor" class="form-control" v-if="filterMode=='mes'"> 
+          <option value="01">Enero</option>
+          <option value="02">Febrero</option>
+          <option value="03">Marzo</option>
+          <option value="04">Abril</option>
+          <option value="05">Mayo</option>
+          <option value="06">Junio</option>
+          <option value="07">Julio</option>
+          <option value="08">Agosto</option>
+          <option value="09">Setiembre</option>
+          <option value="10">Octubre</option>
+          <option value="11">Noviembre</option>
+          <option value="12">Diciembre</option>
+        </select>
+        <div class="btn-group mt-3" data-toggle="buttons">
+          <label class="btn btn-primary active" @click="valor=''">
+            <input type="radio" value="all" v-model="filterMode"> Todos
+          </label>
+          <label class="btn btn-primary active" @click="valor=''">
+            <input type="radio" value="area" v-model="filterMode"> ID Area
+          </label>
+          <label class="btn btn-primary" @click="valor=''">
+            <input type="radio" value="tipo" v-model="filterMode"> Tipo
+          </label>
+          <label class="btn btn-primary" @click="valor=''">
+            <input type="radio" value="seguimiento" v-model="filterMode"> Seguimiento
+          </label>
+          <label class="btn btn-primary" @click="valor=''">
+            <input type="radio" value="fecha" v-model="filterMode"> Fecha
+          </label>
+          <label class="btn btn-primary" @click="valor=''">
+            <input type="radio" value="mes" v-model="filterMode"> Mes
+          </label>
+        </div>
+      </div>
+    </form>
+    <p>Total: {{filterOrders.length}} Pedidos encontrados</p>
+    <div style="height:80vh; width:100%; overflow: scroll;">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">Item</th>
+            <th scope="col">N° pedido</th>
+            <th scope="col">COD POI</th>
+            <th scope="col">COD POMDIHMA</th>
+            <th scope="col">TIPO</th>
+            <th scope="col">FECHA</th>
+            <th scope="col">FECHA ATENDIDO</th>
+            <th scope="col">FECHA COMPRA/SERVICIO</th>
+            <th scope="col">AREA</th>
+            <th scope="col">SEGUIMIENTO</th>
+          </tr>
+        </thead>
+        <tbody>                            
+          <tr v-for="order in filterOrders">
+            <td>{{order.id}}</td>
+            <td>{{order.number}}</td>
+            <td>{{order.cod_poi}}</td>
+            <td>{{order.cod_pomdihma}}</td>
+            <td>{{order.type}}</td>
+            <td>{{order.order_date}}</td>
+            <td>{{order.served_date}}</td>
+            <td>{{order.service_date}}</td>
+            <td>{{order.number_area}}</td>
+            <td>{{order.tracing}}</td>
+            <td> <a href='#' @click="showViewMore(order)">...</a></td>
+            <td> <a href='#' @click="showUpdateOrder(order)">Editar</a></td>
+          </tr>                         
+        </tbody>
+      </table>
+    </div>
+    <div @click="exportData()" class="btn btn-success">Descargar Excel</div>
+
+    <!-- ventana modal para agregar y actualizar pedidos  -->
+    <!-- la ventana solo se mostrará cuando showModal sea verdadero  -->
+    <div class="fixed-top w-100 d-flex justify-content-center align-items-center bg-light"  style="min-height:100vh" v-if="showModal">
+      <form @submit.prevent="execSubmit()" class="w-75 d-flex flex-wrap align-items-center">
+        <!-- Según el modo en que se encuentre mostrar el texto modo '0' Registrar, modo '1' Actualizar Pedido  -->
+        <h1 v-if="mode==0" class="text-center w-100">Registrar Pedido</h1>
+        <h1 v-else class="text-center w-100">Actualizar Pedido</h1>
+        <!-- el fomulario se muestra solo cuándo registra un nuevo pedido
+        si el pedido se actualiza, no lo muestra, ya que es el identificador y no debe ser modificado -->
+        <div class="form-group col col-md-4" v-if="mode==0">
+          <label class="w-100">
+            # Pedido
+            <input type="text" class="form-control" v-model="newOrder.number">          
+          </label>
+        </div>
+        <div class="form-group col col-md-4">
+          <label class="w-100">
+            Area 
+            <select v-model="newOrder.id_area" class="form-control">
+              <option :value="area.id" v-for="area in areas">{{area.name}}</option>
+            </select>
+          </label>
+          
+        </div>
+        <div  class="form-group col col-md-4">
+          <label class="w-100">
+            Tipo
+            <input type="text" class="form-control" v-model="newOrder.type">
+          </label>
+        </div>
+        <div  class="form-group col col-md-4">
+          <label class="w-100">
+            Cod. POI 
+            <input type="text" class="form-control" v-model="newOrder.cod_poi">
+          </label>
+        </div>
+        <div  class="form-group col col-md-4">
+          <label class="w-100">
+            Cod. POMDIHMA 
+            <input type="text" class="form-control" v-model="newOrder.cod_pomdihma">
+          </label>
+        </div>
+        <div  class="form-group col col-md-4">
+          <label class="w-100">
+            Fecha 
+            <input type="date" class="form-control" v-model="newOrder.order_date">
+          </label>
+        </div>
+        <div  class="form-group col col-md-4">
+          <label class="w-100">
+            Fecha Atendido 
+            <input type="date" class="form-control" v-model="newOrder.served_date">
+          </label>
+        </div>
+        <div  class="form-group col col-md-4">
+          <label class="w-100">
+            Fecha Compra/Servicio 
+            <input type="date" class="form-control" v-model="newOrder.service_date">
+          </label>
+        </div>
+        <div  class="form-group col col-md-4">
+          <label class="w-100">
+            Seguimiento 
+            <input type="text" class="form-control" v-model="newOrder.tracing">
+          </label>
+        </div>
+        <div class="form-group col col-md-4" v-if="mode==0">
+          <a href="#" class="btn btn-success btn-block" @click="showModalDetail=true">AGREGAR DETALLE</a>
+        </div>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Descripción</th>
+              <th scope="col">Cantidad</th>
+              <th scope="col">Unidad</th>
+              <th scope="col">Costo Estimado</th>
+              <th scope="col">Costo Real</th>
+              <th scope="col" v-if="mode==1">Opciones</th>
+            </tr>
+          </thead>
+          <tbody>                            
+            <tr v-for="detail in details">
+              <td>{{detail.description}}</td>
+              <td>{{detail.quantity}}</td>
+              <td>{{detail.unit}}</td>
+              <td>{{detail.estimated_cost}}</td>
+              <td>{{detail.real_cost}}</td>
+              <td v-if="mode==1"><a href="#" @click="showUpdateDetail(detail)">Editar</a></td>
+            </tr>                         
+          </tbody>
+        </table>
+        <div  class="w-100 py-3">
+            <!-- Según el modo que se encuentre se mostrar el botón registrar o actualizar  -->
+            <input type="submit" class="btn btn-success" value="registrar" v-if="mode==0" >
+            <input type="submit" class="btn btn-success" value="editar" v-else>
+            <!-- al dar click en Cerrar el showModal pasa a falso y limpiamos los datos que se encuentren  -->
+            <a href="#" class="btn btn-danger" @click="newOrder={};showModal=false;details=[]">Cerrar</a>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Modal para agregar detalles de pedido  -->
+    <div class="fixed-top d-flex justify-content-center align-items-center w-100" style="background:#ccc;min-height:100vh" v-if="showModalDetail" >      
+      <form @submit.prevent="execSubmitDetail()" class="w-75 d-flex flex-wrap align-items-center">
+        <h1 class="text-center w-100 mb-5" v-if="modeDetail==0">Agregar Detalle</h1>          
+        <h1 class="text-center w-100 mb-5" v-else>Editar Detalle</h1>          
+        <div class="form-group col col-md-12">
+          <label class="w-100">
+            Descripción
+            <input type="text" class="form-control" v-model="newDetail.description">          
+          </label>
+        </div>
+        <div class="form-group col col-md-3">
+          <label class="w-100">
+            Cantidad
+            <input type="text" class="form-control" v-model="newDetail.quantity">
+          </label>
+          
+        </div>
+        <div  class="form-group col col-md-3">
+          <label class="w-100">
+            Unidad
+            <input type="text" class="form-control" v-model="newDetail.unit">
+          </label>
+        </div>    
+        <div  class="form-group col col-md-3">
+          <label class="w-100">
+            Costo Estimado
+            <input type="text" class="form-control" v-model="newDetail.estimated_cost">
+          </label>
+        </div>
+        <div  class="form-group col col-md-3">
+          <label class="w-100">
+            Costo Real
+            <input type="text" class="form-control" v-model="newDetail.real_cost">
+          </label>
+        </div>
+        <div  class="w-100 py-3">
+          <input type="submit" class="btn btn-success" value="Agregar" v-if="modeDetail==0">
+          <input type="submit" class="btn btn-success" value="Editar" v-else>
+          <a href="#" class="btn btn-danger" @click="newDetail={};details=[];showModalDetail=false;modeDetail=0" v-if="modeDetail==0">Cerrar</a>
+          <a href="#" class="btn btn-danger" @click="newDetail={};showModalDetail=false;modeDetail=0" v-else>Cerrar</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Mostrar el contenido de un pedido, de la tabla general  -->
+    <div class="fixed-top d-flex justify-content-center align-items-center w-100" style="background:#ccc;min-height:100vh" v-if="showViewMoreModal">
+      <form class="w-75 d-flex flex-wrap align-items-center">
+        <h1 class="text-center w-100 mb-5">Pedido #{{order.number}}</h1>   
+        <div class="bg-light rounded d-flex align-items-center py-2 my-2 w-100" style="color:#666">
+          <div class="col col-md-2">
+            Item
+          </div>
+          <div class="col col-md-2">
+            Número
+          </div>
+          <div class="col col-md-2">
+            COD POI
+          </div>
+          <div class="col col-md-2">
+            COD POMDIHMA
+          </div>
+          <div class="col col-md-2">
+            Tipo
+          </div>
+          <div class="col col-md-2">
+            ID AREA
+          </div>
+        </div>
+        <div class="bg-light rounded d-flex align-items-center py-2 mb-4 w-100">
+          <div class="col col-md-2">
+            {{order.id}}
+          </div>
+          <div class="col col-md-2">
+            {{order.number}}
+          </div>
+          <div class="col col-md-2">
+            {{order.cod_poi}}
+          </div>
+          <div class="col col-md-2">
+            {{order.cod_pomdihma}}
+          </div>
+          <div class="col col-md-2">
+            {{order.type}}
+          </div>
+          <div class="col col-md-2">
+            {{order.id_area}}
+          </div>
+        </div>
+        <div class="bg-light rounded d-flex align-items-center py-2 my-2 w-100" style="color:#666">
+          <div class="col col-md-3">
+            FECHA
+          </div>
+          <div class="col col-md-3">
+            FECHA ATENDIDO
+          </div>
+          <div class="col col-md-3">
+            FECHA COMPRA/SERVICIO
+          </div>
+          <div class="col col-md-3">
+            SEGUIMIENTO
+          </div>
+        </div>
+        <div class="bg-light rounded d-flex align-items-center py-2 mb-4 w-100">
+          <div class="col col-md-3">
+            {{order.order_date}}
+          </div>
+          <div class="col col-md-3">
+            {{order.served_date}}
+          </div>
+          <div class="col col-md-3">
+            {{order.service_date}}
+          </div>
+          <div class="col col-md-3">
+            {{order.tracing}}
+          </div>
+        </div>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Descripción</th>
+              <th scope="col">Cantidad</th>
+              <th scope="col">Unidad</th>
+              <th scope="col">Seguimiento</th>
+              <th scope="col">Costo Estimado</th>
+              <th scope="col">Costo Real</th>
+            </tr>
+          </thead>
+          <tbody>                            
+            <tr v-for="detail in order.details">
+              <td>{{detail.description}}</td>
+              <td>{{detail.quantity}}</td>
+              <td>{{detail.unit}}</td>
+              <td>{{detail.tracing}}</td>
+              <td>{{detail.estimated_cost}}</td>
+              <td>{{detail.real_cost}}</td>
+            </tr>                         
+          </tbody>
+        </table>
+        <div  class="w-100 py-3">
+          <a href="#" class="btn btn-danger" @click="showViewMoreModal=false">Cerrar</a>
+        </div> 
+      </form>
+    </div>
+    
+
+  </div>
+
+  <!-- Importamos vueJS -->
+  <!-- Documentación de VueJS  https://vuejs.org/v2/guide/   -->
+  <script src="views/js/vue.js"></script>
+  <!-- Importamos sweetalert2 para crea custom alerts (alertas personalizadas)  -->
+  <!-- Documentación : https://sweetalert2.github.io/ -->
+  <script src="views/js/sweetalert.js"></script>
+  <script src="views/js/order.js"></script>
+
+</body>
+</html>

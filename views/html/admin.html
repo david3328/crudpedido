@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!-- Título de la página -->
+  <title>OPEMA - Administración</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--
+    el css lo importamos con toda la ruta, porque debemos recordar que el archivo es llamado
+    desde el index o raíz del proyecto
+    por lo tanto la ruta sería: views/css/bootstrap.min.css 
+  -->
+  <link rel="stylesheet" href="views/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="py-3 container">
+    <h1 class="text-center">Pedidos internos</h1> 
+    <ul class="nav nav-pills nav-fill">
+      <div class="col-md-4">
+        <li class="nav-item">
+          <!-- redirigimos a la  vista areas ?view=area  -->
+        <a class="nav-link  btn btn-secondary" href="?view=area">Departamentos</a>
+        </li>
+      </div>
+      <div class="col-md-4">
+        <li class="nav-item">
+          <!-- redirigimos a la vista pedidos ?view=pedido -->
+        <a class="nav-link  btn btn-primary" href="?view=order">Pedidos internos</a>
+        </li>
+      </div>
+      <div class="col-md-4">
+        <li class="nav-item">
+          <!-- cerroamos sesión medianto mediante la vista logOut ?view=logout -->
+        <a class="nav-link  btn btn-danger" href="?view=logout">Cerrar sesión</a>
+        </li>
+      </div>
+    </ul>
+  </div>
+    
+  <div id="carousell" class="carousel slide" data-ride="carousel" style="width: 800px; margin-left: 250px; margin-top: 10px;">
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <img class="d-block w-100" src="views/img/peot.jpg" alt="First slide">
+      </div>
+    </div>
+  </div>
+</body>
+</html>

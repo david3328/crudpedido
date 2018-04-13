@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Colocarle un título a la página  -->
+    <title>OPEMA - CLIENT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--
+      el css lo importamos con toda la ruta, porque debemos recordar que el archivo es llamado
+      desde el index o raíz del proyecto
+      por lo tanto la ruta sería: views/css/bootstrap.min.css 
+    -->
+    <link rel="stylesheet" href="views/css/bootstrap.min.css">
+</head>
+<body>
+  <!-- el ID = app me permite bindear con la instancia Vue  -->
+  <div class="container" id="app">
+    <div class="col-sm-10" style="width: 600px; margin-left: 250px; margin-top: 50px;">
+      <div class="jumbotron">
+        <!-- 
+        Escuchamos el evento submit 
+        (submit.prevent) previene el evento por defecto, para no recargar la página 
+        el evento submit ejecuta el método/función goLogin que definimos en el script index.js 
+        -->
+        <form class="form-horizontal" style="margin-left: 50px;" @submit.prevent="goLogin()">
+          <h1 class="text-center">Iniciar Sesión</h1>          
+          <div class="form-group input-group">            
+            <!-- v-model = "username" para bindear con username en el script index.js -->
+            <input type="text" class="form-control" v-model="username" placeholder="Usuario">
+          </div>
+          <div class="form-group input-group">
+            <!-- v-model = "password" para bindear con password en el script index.js -->            
+            <input type="password"  class="form-control" v-model="password" placeholder="Contraseña">
+          </div>
+          <div class="form-group text-center">
+            <input type="submit"  class="btn btn-success" value="Entrar">
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- Importamos vueJS -->
+  <!-- Documentación de VueJS  https://vuejs.org/v2/guide/   -->
+  <script src="views/js/vue.js"></script>
+  <!-- Importamos sweetalert2 para crea custom alerts (alertas personalizadas)  -->
+  <!-- Documentación : https://sweetalert2.github.io/ -->
+  <script src="views/js/sweetalert.js"></script>
+  <!-- Importamos el script donde trabajaremos  -->
+  <script src="views/js/index.js"></script>
+</body>
+</html>
